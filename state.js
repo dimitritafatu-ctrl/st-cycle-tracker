@@ -36,7 +36,7 @@ export function getPregnancyData() {
     }
 
     if (!s.chatPregnancyData[chatId]) {
-        s.chatPregnancyData[chatId] = structuredClone(defaultPregnancyData);
+        s.chatPregnancyData[chatId] = JSON.parse(JSON.stringify(defaultPregnancyData));
     }
     
     return s.chatPregnancyData[chatId];

@@ -181,6 +181,21 @@ export function setupUI() {
             </div>
             <hr>
             <div class="flex-container flexFlowColumn">
+                <label><strong>Режим работы</strong></label>
+                <select id="repro-mode" class="text_pole">
+                    <option value="realism">Реализм</option>
+                    <option value="omegaverse">ОмегаВерс</option>
+                </select>
+            </div>
+            <div class="flex-container flexFlowColumn" style="margin-top: 5px;">
+                <label><strong>Пол персонажа</strong></label>
+                <select id="repro-gender" class="text_pole">
+                    <option value="female">Женщина</option>
+                    <option value="male">Мужчина (для ОмегаВерс)</option>
+                </select>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
                 <label><strong>${L('contraceptionTitle')}</strong></label>
                 <select id="repro-contraception" class="text_pole">
                     <option value="none">${L('contraceptionTypes.none')}</option>
