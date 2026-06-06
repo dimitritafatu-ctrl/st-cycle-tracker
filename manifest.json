@@ -2,7 +2,11 @@
   "display_name": "Cycle & Pregnancy Tracker",
   "js": "index.js",
   "css": "style.css",
-  "author": "Gemini CLI",
-  "version": "1.0.0",
-  "description": "Tracks user's menstrual cycle, ovulation, and pregnancy within SillyTavern."
+  "author": "Delidgi & Gemini CLI",
+  "version": "1.7.6",
+  "description": "Advanced Reproductive System: menstrual cycle, conception (dice-roll), pregnancy monitoring, complications, and RP-date parsing.",
+  "loading_order": 10,
+  "requires": [],
+  "optional": [],
+  "auto_update": true
 }
