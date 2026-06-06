@@ -290,6 +290,18 @@ export function setupUI() {
             saveSettingsDebounced();
         });
 
+        $('#repro-mode').on('change', function() {
+            getSettings().mode = this.value;
+            saveSettingsDebounced();
+            updatePromptInjection();
+        });
+
+        $('#repro-gender').on('change', function() {
+            getSettings().userGender = this.value;
+            saveSettingsDebounced();
+            updatePromptInjection();
+        });
+
         $('#repro-contraception').on('change', function() {
             getSettings().contraception = this.value;
             saveSettingsDebounced();
@@ -380,6 +392,23 @@ export function setupUI() {
             showNotification(`🤰 Беременность установлена!\n${weeks}/${duration} нед. | ${formatFetusCount(count)} | Пол: ${formatSexIcons(p.fetusSex)}`, 'success');
 
             $('#repro-manual-pregnancy').slideUp(200);
+        });
+
+        $('#repro-reset').on('click', function() {
+            if (confirm('Сбросить беременность?')) {
+                resetPregnancy();
+                showNotification('Беременность сброшена', 'info');
+            }
+        });
+
+        syncUI();
+
+    } catch (error) {
+        console.error('[Reproductive] setupUI error:', error);
+    }
+}
+
+nual-pregnancy').slideUp(200);
         });
 
         $('#repro-reset').on('click', function() {

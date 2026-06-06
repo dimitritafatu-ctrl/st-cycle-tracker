@@ -166,32 +166,43 @@ export function onMessageReceived() {
         }
         
         // Логика валидации:
-        // 1. Если есть directPhrase (явная вагинальная эякуляция типа "creampie", "cum inside pussy") — ОК
-        // 2. Если есть anal/oral БЕЗ directPhrase — ИГНОРИРУЕМ (скорее всего анальный/оральный секс)
-        // 3. Если есть ejaculation + inside БЕЗ anal/oral — ОК
-        
         let isValidConception = false;
         
-        if (hasDirectPhrase) {
-            // Явная вагинальная эякуляция — всегда ОК
-            isValidConception = true;
-            console.log('[Reproductive] Direct vaginal phrase detected - valid');
-        } else if (hasAnal || hasOral) {
-            // Есть анальный/оральный контекст, но нет явной вагинальной фразы — ИГНОР
-            console.log(`[Reproductive] Tag found but anal=${hasAnal}, oral=${hasOral} detected without explicit vaginal phrase - ignoring`);
-            return;
-        } else if (hasEjaculation && hasInside) {
-            // Есть эякуляция + внутрь, нет анального/орального — ОК
-            isValidConception = true;
-            console.log('[Reproductive] Ejaculation + inside detected without anal/oral - valid');
+        const isMaleOmega = s.mode === 'omegaverse' && s.userGender === 'male';
+
+        if (isMaleOmega) {
+            // Male Omegaverse: Зачатие ТОЛЬКО при анальном сексе с эякуляцией внутрь
+            if (hasOral || hasDirectPhrase) {
+                // Если есть орал или специфично вагинальная фраза
+                console.log(`[Reproductive] Male Omegaverse: Tag found but oral=${hasOral} or explicit vaginal phrase detected - ignoring`);
+                return;
+            } else if (hasAnal && hasEjaculation && hasInside) {
+                isValidConception = true;
+                console.log('[Reproductive] Male Omegaverse: Anal ejaculation + inside detected - valid');
+            } else if (hasAnal && (text.toLowerCase().includes('creampie') || text.toLowerCase().includes('breed') || /cum.*inside/i.test(text))) {
+                isValidConception = true;
+                console.log('[Reproductive] Male Omegaverse: Anal context + direct inside phrase detected - valid');
+            }
+        } else {
+            // Realism или Female Omegaverse: Зачатие ТОЛЬКО при вагинальном сексе
+            if (hasDirectPhrase) {
+                isValidConception = true;
+                console.log('[Reproductive] Direct vaginal phrase detected - valid');
+            } else if (hasAnal || hasOral) {
+                console.log(`[Reproductive] Tag found but anal=${hasAnal}, oral=${hasOral} detected without explicit vaginal phrase - ignoring`);
+                return;
+            } else if (hasEjaculation && hasInside) {
+                isValidConception = true;
+                console.log('[Reproductive] Ejaculation + inside detected without anal/oral - valid');
+            }
         }
         
         if (!isValidConception) {
-            console.log(`[Reproductive] Tag found but content check FAILED: ejaculation=${hasEjaculation}, inside=${hasInside}, direct=${hasDirectPhrase}, anal=${hasAnal}, oral=${hasOral} - ignoring`);
+            console.log(`[Reproductive] Tag found but content check FAILED - ignoring`);
             return;
         }
 
-        console.log('[Reproductive] Tag detected AND vaginal ejaculation confirmed! Rolling conception check...');
+        console.log('[Reproductive] Tag detected AND ejaculation confirmed! Rolling conception check...');
 
         const cycleDayMatch = text.match(/\[CYCLE_DAY:(\d+)\]/);
         if (cycleDayMatch) {

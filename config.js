@@ -6,6 +6,8 @@ export const extensionName = 'st-cycle-tracker';
 
 export const defaultSettings = {
     isEnabled: true,
+    mode: 'realism',
+    userGender: 'female',
     showNotifications: true,
     language: 'ru',
     contraception: 'none',

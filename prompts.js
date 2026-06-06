@@ -37,8 +37,12 @@ export function getBasePrompt() {
         return prompt;
     }
 
-    prompt += `\nTag [CONCEPTION_CHECK]: add ONLY when vaginal ejaculation inside has ALREADY HAPPENED (past tense).\n`;
-    prompt += `DO NOT add for: ongoing sex, future tense ("will cum"), anal, oral, external ejaculation, pull-out, intact condom.\n`;
+    const isMaleOmega = s.mode === 'omegaverse' && s.userGender === 'male';
+    const actType = isMaleOmega ? 'anal ejaculation inside' : 'vaginal ejaculation inside';
+    const forbiddenActs = isMaleOmega ? 'vaginal, oral' : 'anal, oral';
+
+    prompt += `\nTag [CONCEPTION_CHECK]: add ONLY when ${actType} has ALREADY HAPPENED (past tense).\n`;
+    prompt += `DO NOT add for: ongoing sex, future tense ("will cum"), ${forbiddenActs}, external ejaculation, pull-out, intact condom.\n`;
     prompt += `Format (hidden at end): <!-- [CYCLE_DAY:${day}][CONCEPTION_CHECK] -->`;
 
     return prompt;
