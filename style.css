@@ -1,62 +1,120 @@
-.st-cycle-tracker-settings .inline-drawer-content {
+.st-cycle-tracker-settings {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+}
+
+.st-cycle-tracker-settings .status_container {
+    background: rgba(0, 0, 0, 0.25);
     padding: 15px;
-    background-color: var(--grey-color-light);
-    border-radius: 0 0 10px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin: 15px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.st-cycle-tracker-settings .status_container:hover {
+    background: rgba(0, 0, 0, 0.35);
+    border-color: var(--mainColor);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.st-cycle-tracker-status-value {
+    font-size: 1.15em;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.st-cycle-tracker-visual {
+    font-size: 3em;
+    margin: 5px 0;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.15));
+    animation: st-pulse 2.5s infinite ease-in-out;
+}
+
+@keyframes st-pulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1)); }
+    50% { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1)); }
+}
+
+/* Gender Styling */
+.gender-boy { 
+    color: #89CFF0 !important; 
+    text-shadow: 0 0 10px rgba(137, 207, 240, 0.5);
+}
+.gender-girl { 
+    color: #F4C2C2 !important; 
+    text-shadow: 0 0 10px rgba(244, 194, 194, 0.5);
+}
+.gender-mixed { 
+    background: linear-gradient(135deg, #89CFF0, #F4C2C2); 
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
 }
 
 .st-cycle-tracker-settings .setup_item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 8px;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.st-cycle-tracker-settings .setup_item_label {
-    flex: 1;
-    font-size: 0.95em;
-    color: var(--text-color);
+.st-cycle-tracker-settings .setup_item:last-child {
+    border-bottom: none;
 }
 
 .st-cycle-tracker-settings .menu_button {
     width: 100%;
-    margin-top: 5px;
-    background-color: var(--mainColor);
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: filter 0.2s;
+    margin-top: 8px;
+    padding: 10px !important;
+    border-radius: 8px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease !important;
+}
+
+.st-cycle-tracker-settings .menu_button i {
+    font-size: 0.9em;
 }
 
 .st-cycle-tracker-settings .menu_button:hover {
-    filter: brightness(1.2);
+    filter: brightness(1.1);
+    background: var(--mainColor) !important;
+    color: white !important;
 }
 
-#st_cycle_tracker_status {
-    padding: 8px 12px;
-    border-radius: 8px;
-    background-color: rgba(var(--mainColorRgb), 0.15);
-    border: 1px solid var(--mainColor);
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.st-cycle-tracker-settings .menu_button:active {
+    transform: scale(0.98);
 }
 
-.st-cycle-tracker-settings .info_box {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    font-style: italic;
+.info_box {
+    margin-top: 15px;
+    padding: 12px;
+    background: rgba(var(--mainColorRgb), 0.08);
+    border-left: 4px solid var(--mainColor);
+    border-radius: 6px;
+    font-size: 0.9em;
     line-height: 1.4;
+    color: rgba(255, 255, 255, 0.8);
 }
 
-.st-cycle-tracker-settings .status_container {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
+.info_box i {
+    margin-right: 5px;
+    color: var(--mainColor);
 }

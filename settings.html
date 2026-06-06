@@ -20,21 +20,26 @@
                 <input type="checkbox" id="st_cycle_tracker_auto">
             </div>
             
-            <div class="setup_item status_container">
-                <div class="setup_item_label">Текущий статус:</div>
-                <div id="st_cycle_tracker_status" style="font-weight: bold; color: var(--mainColor);">Нет данных</div>
+            <div class="status_container">
+                <div class="setup_item_label">Текущий статус {{user}}:</div>
+                <div id="st_cycle_tracker_visual" class="st-cycle-tracker-visual"></div>
+                <div id="st_cycle_tracker_status" class="st-cycle-tracker-status-value">Нет данных</div>
             </div>
 
             <div class="setup_item">
-                <button id="st_cycle_tracker_set_period" class="menu_button">Начать новый цикл (сегодня)</button>
+                <button id="st_cycle_tracker_set_period" class="menu_button">
+                    <i class="fa-solid fa-calendar-plus"></i> Начать новый цикл
+                </button>
             </div>
 
             <div class="setup_item">
-                <button id="st_cycle_tracker_reset" class="menu_button">Сбросить беременность</button>
+                <button id="st_cycle_tracker_reset" class="menu_button">
+                    <i class="fa-solid fa-trash-can"></i> Сбросить беременность
+                </button>
             </div>
 
-            <div class="setup_item info_box">
-                <small>Трекер использует реальное время. Овуляция происходит на 12-16 день цикла. Шанс зачатия учитывается только в фазу овуляции при включенном авто-зачатии.</small>
+            <div class="info_box">
+                <small><i class="fa-solid fa-info-circle"></i> Овуляция происходит на 12-16 день. Шанс зачатия учитывается только в фазу овуляции.</small>
             </div>
         </div>
     </div>

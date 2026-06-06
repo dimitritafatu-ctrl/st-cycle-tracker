@@ -4,6 +4,7 @@ const {
     renderExtensionTemplateAsync,
     eventSource,
     event_types,
+    substituteParams, // Added for dynamic name resolution
 } = SillyTavern.getContext();
 
 const MODULE_NAME = 'st_cycle_tracker';
@@ -24,17 +25,16 @@ const DEFAULT_SETTINGS = {
 };
 
 const PHASES = {
-    'Menstruation': 'Менструация',
-    'Follicular': 'Фолликулярная фаза',
-    'Ovulation': 'Овуляция',
-    'Luteal': 'Лютеиновая фаза'
+    'Menstruation': { label: 'Менструация', icon: 'fa-droplet', color: '#ff4d4d' },
+    'Follicular': { label: 'Фолликулярная фаза', icon: 'fa-seedling', color: '#4dff88' },
+    'Ovulation': { label: 'Овуляция', icon: 'fa-egg', color: '#ffff4d' },
+    'Luteal': { label: 'Лютеиновая фаза', icon: 'fa-sun', color: '#ffad33' }
 };
 
 function initSettings() {
     if (!extensionSettings[MODULE_NAME]) {
         extensionSettings[MODULE_NAME] = { ...DEFAULT_SETTINGS };
     } else {
-        // Merge settings to ensure new defaults are present
         extensionSettings[MODULE_NAME] = Object.assign({}, DEFAULT_SETTINGS, extensionSettings[MODULE_NAME]);
     }
 }
@@ -58,22 +58,42 @@ function updateUI() {
     const now = new Date();
     
     let statusText = '';
+    let visualHtml = '';
+    let statusColor = 'var(--mainColor)';
+
     if (settings.isPregnant) {
         const conceptionDate = new Date(settings.conceptionDate);
         const diffWeeks = Math.floor((now - conceptionDate) / (1000 * 60 * 60 * 24 * 7));
-        const genderText = settings.pregnancyData.gender === 'Boy' ? 'Мальчик' : (settings.pregnancyData.gender === 'Girl' ? 'Девочка' : 'Разные');
-        const countText = settings.pregnancyData.count === 1 ? 'один ребёнок' : 
-                          (settings.pregnancyData.count === 2 ? 'близнецы' : 'тройня');
+        const gender = settings.pregnancyData.gender;
+        const count = settings.pregnancyData.count;
+        
+        const genderText = gender === 'Boy' ? 'Мальчик' : (gender === 'Girl' ? 'Девочка' : 'Разные');
+        const countText = count === 1 ? 'один ребёнок' : (count === 2 ? 'близнецы' : 'тройня');
         
         statusText = `Беременность: ${diffWeeks} нед. (${countText}, ${genderText})`;
+        
+        const genderClass = gender === 'Boy' ? 'gender-boy' : (gender === 'Girl' ? 'gender-girl' : 'gender-mixed');
+        const babyIcon = `<i class="fa-solid fa-baby ${genderClass}"></i>`;
+        visualHtml = babyIcon.repeat(count);
+        statusColor = gender === 'Boy' ? '#89CFF0' : (gender === 'Girl' ? '#F4C2C2' : 'var(--mainColor)');
     } else if (settings.lastPeriodDate) {
-        const phase = getCyclePhase(now);
-        statusText = `Фаза: ${PHASES[phase] || phase}`;
+        const phaseKey = getCyclePhase(now);
+        const phase = PHASES[phaseKey];
+        if (phase) {
+            statusText = `Фаза: ${phase.label}`;
+            visualHtml = `<i class="fa-solid ${phase.icon}" style="color: ${phase.color}"></i>`;
+            statusColor = phase.color;
+        } else {
+            statusText = 'Нет данных';
+            visualHtml = '<i class="fa-solid fa-circle-question"></i>';
+        }
     } else {
-        statusText = 'Нет данных';
+        statusText = 'Требуется настройка';
+        visualHtml = '<i class="fa-solid fa-gear"></i>';
     }
 
-    $('#st_cycle_tracker_status').text(statusText);
+    $('#st_cycle_tracker_status').text(statusText).css('color', statusColor);
+    $('#st_cycle_tracker_visual').html(visualHtml);
 }
 
 function rollForPregnancy() {
@@ -88,7 +108,6 @@ function rollForPregnancy() {
         const genderRoll = Math.random() > 0.5 ? 'Boy' : 'Girl';
         const countRoll = Math.random() > 0.95 ? (Math.random() > 0.9 ? 3 : 2) : 1;
         
-        // For twins/triplets, gender can be mixed
         let finalGender = genderRoll;
         if (countRoll > 1 && Math.random() > 0.5) {
             finalGender = 'Mixed';
@@ -103,12 +122,18 @@ function rollForPregnancy() {
         };
         saveSettingsDebounced();
         updateUI();
-        toastr.info('Система: Произошло зачатие!');
+        toastr.info('Система: Произошло зачатие! Поздравляем!');
     }
 }
 
 async function initUI() {
-    const html = await renderExtensionTemplateAsync('third-party/st-cycle-tracker', 'settings');
+    let html = await renderExtensionTemplateAsync('third-party/st-cycle-tracker', 'settings');
+    
+    // Replace {{user}} dynamically
+    if (typeof substituteParams === 'function') {
+        html = substituteParams(html);
+    }
+
     $('#extensions_settings2').append(html);
 
     const settings = extensionSettings[MODULE_NAME];
@@ -136,6 +161,7 @@ async function initUI() {
         settings.isPregnant = false;
         saveSettingsDebounced();
         updateUI();
+        toastr.success('Цикл обновлен!');
     });
 
     $('#st_cycle_tracker_reset').on('click', () => {
@@ -143,6 +169,7 @@ async function initUI() {
         settings.conceptionDate = null;
         saveSettingsDebounced();
         updateUI();
+        toastr.warning('Данные о беременности сброшены.');
     });
 
     updateUI();
