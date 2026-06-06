@@ -2,7 +2,7 @@
   "display_name": "Cycle & Pregnancy Tracker",
   "js": "index.js",
   "css": "style.css",
-  "author": "Delidgi & Gemini CLI",
+  "author": "lini",
   "version": "1.7.6",
   "description": "Advanced Reproductive System: menstrual cycle, conception (dice-roll), pregnancy monitoring, complications, and RP-date parsing."
 }
