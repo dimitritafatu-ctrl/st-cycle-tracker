@@ -386,7 +386,7 @@ export function handleComplicationConsequences(complication, weeks) {
                 showNotification(`💔 ВЫКИДЫШ\nБеременность прервалась на ${weeks} неделе...`, 'warning');
             }
             setTimeout(() => {
-                Object.assign(p, structuredClone(defaultPregnancyData));
+                Object.assign(p, JSON.parse(JSON.stringify(defaultPregnancyData)));
                 saveSettingsDebounced();
                 _syncUI();
                 _updatePromptInjection();
@@ -407,7 +407,7 @@ export function handleComplicationConsequences(complication, weeks) {
             showNotification(`👶 ПРЕЖДЕВРЕМЕННЫЕ РОДЫ (${weeks} нед.)\n${formatFetusCount(p.fetusCount)}: ${formatSexIcons(p.fetusSex)}\n${statusText}`, 'warning');
         }
         setTimeout(() => {
-            Object.assign(p, structuredClone(defaultPregnancyData));
+            Object.assign(p, JSON.parse(JSON.stringify(defaultPregnancyData)));
             saveSettingsDebounced();
             _syncUI();
             _updatePromptInjection();
@@ -425,7 +425,7 @@ export function handleComplicationConsequences(complication, weeks) {
                 showNotification(`🚨 ЭКСТРЕННОЕ КЕСАРЕВО!\nГестоз угрожает жизни.\nМалыш: ${formatSexIcons(p.fetusSex)}`, 'warning');
             }
             setTimeout(() => {
-                Object.assign(p, structuredClone(defaultPregnancyData));
+                Object.assign(p, JSON.parse(JSON.stringify(defaultPregnancyData)));
                 saveSettingsDebounced();
                 _syncUI();
                 _updatePromptInjection();
@@ -448,7 +448,7 @@ export function handleComplicationConsequences(complication, weeks) {
                 showNotification(`💔 ИЦН привела к потере беременности на ${weeks} неделе...`, 'warning');
             }
             setTimeout(() => {
-                Object.assign(p, structuredClone(defaultPregnancyData));
+                Object.assign(p, JSON.parse(JSON.stringify(defaultPregnancyData)));
                 saveSettingsDebounced();
                 _syncUI();
                 _updatePromptInjection();
@@ -477,7 +477,7 @@ export function handleComplicationConsequences(complication, weeks) {
                 }
             }
             setTimeout(() => {
-                Object.assign(p, structuredClone(defaultPregnancyData));
+                Object.assign(p, JSON.parse(JSON.stringify(defaultPregnancyData)));
                 saveSettingsDebounced();
                 _syncUI();
                 _updatePromptInjection();
@@ -504,7 +504,7 @@ export function handleComplicationConsequences(complication, weeks) {
                     showNotification(`💔 Осложнения привели к потере беременности...`, 'warning');
                 }
                 setTimeout(() => {
-                    Object.assign(p, structuredClone(defaultPregnancyData));
+                    Object.assign(p, JSON.parse(JSON.stringify(defaultPregnancyData)));
                     saveSettingsDebounced();
                     _syncUI();
                     _updatePromptInjection();
@@ -550,7 +550,7 @@ export function getComplicationTypes(weeks) {
 
 export function resetPregnancy() {
     const p = getPregnancyData();
-    Object.assign(p, structuredClone(defaultPregnancyData));
+    Object.assign(p, JSON.parse(JSON.stringify(defaultPregnancyData)));
     saveSettingsDebounced();
     _syncUI();
     _updatePromptInjection();

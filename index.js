@@ -2,7 +2,7 @@
 // INDEX — точка входа расширения
 // ═══════════════════════════════════════════
 
-import { eventSource, event_types, saveSettingsDebounced } from '../../../script.js';
+import { eventSource, event_types, saveSettingsDebounced } from '../../script.js';
 import { extension_settings } from '../../extensions.js';
 import { extensionName, defaultSettings } from './config.js';
 import { getSettings, getCurrentChatId } from './state.js';
@@ -15,7 +15,7 @@ import { onMessageReceived } from './message-handler.js';
 function loadSettings() {
     try {
         if (!extension_settings[extensionName]) {
-            extension_settings[extensionName] = structuredClone(defaultSettings);
+            extension_settings[extensionName] = JSON.parse(JSON.stringify(defaultSettings));
         } else {
             const s = extension_settings[extensionName];
 
@@ -67,7 +67,7 @@ function loadSettings() {
         console.log('[Reproductive] Settings loaded:', extension_settings[extensionName]);
     } catch (error) {
         console.error('[Reproductive] Error loading settings:', error);
-        extension_settings[extensionName] = structuredClone(defaultSettings);
+        extension_settings[extensionName] = JSON.parse(JSON.stringify(defaultSettings));
     }
 }
 

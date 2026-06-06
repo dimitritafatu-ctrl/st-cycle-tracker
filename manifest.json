@@ -4,9 +4,5 @@
   "css": "style.css",
   "author": "Delidgi & Gemini CLI",
   "version": "1.7.6",
-  "description": "Advanced Reproductive System: menstrual cycle, conception (dice-roll), pregnancy monitoring, complications, and RP-date parsing.",
-  "loading_order": 10,
-  "requires": [],
-  "optional": [],
-  "auto_update": true
+  "description": "Advanced Reproductive System: menstrual cycle, conception (dice-roll), pregnancy monitoring, complications, and RP-date parsing."
 }

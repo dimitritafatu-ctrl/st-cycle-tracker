@@ -51,7 +51,7 @@ export function onMessageReceived() {
             showNotification(`🎉 РОДЫ! ${formatFetusCount(p.fetusCount)}: ${formatSexIcons(p.fetusSex)}\nПоздравляем!`, 'success');
         }
         
-        Object.assign(p, structuredClone(defaultPregnancyData));
+        Object.assign(p, JSON.parse(JSON.stringify(defaultPregnancyData)));
         saveSettingsDebounced();
         syncUI();
         updatePromptInjection();
