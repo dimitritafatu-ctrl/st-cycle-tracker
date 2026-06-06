@@ -1,0 +1,8 @@
+{
+  "display_name": "Cycle & Pregnancy Tracker",
+  "js": "index.js",
+  "css": "style.css",
+  "author": "Gemini CLI",
+  "version": "1.0.0",
+  "description": "Tracks user's menstrual cycle, ovulation, and pregnancy within SillyTavern."
+}
