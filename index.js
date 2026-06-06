@@ -5,18 +5,22 @@ const {
     eventSource,
     event_types,
     substituteParams,
+    getCharacters,
+    getCharacterName,
 } = SillyTavern.getContext();
 
 const MODULE_NAME = 'st_cycle_tracker';
 const DEFAULT_SETTINGS = {
     enabled: true,
+    mode: 'realism', // realism | omegaverse
+    userGender: 'female', // female | male
     lastPeriodDate: null,
     cycleLength: 28,
     isPregnant: false,
     conceptionDate: null,
     autoConception: false,
-    injectPrompt: true, // New setting for AI awareness
-    conceptionChance: 5,
+    injectPrompt: true,
+    conceptionChance: 15, // Higher base chance since it's triggered by specific acts now
     pregnancyData: {
         weeks: 0,
         gender: null,
@@ -61,10 +65,39 @@ function getCycleDay(date) {
     return (Math.floor(diffTime / (1000 * 60 * 60 * 24)) % settings.cycleLength) + 1;
 }
 
+function analyzeMessageForConception(text) {
+    const settings = extensionSettings[MODULE_NAME];
+    const t = text.toLowerCase();
+    
+    // Keywords for ejaculation inside
+    const ejaculateKeywords = ['внутри', 'внутрь', 'залил', 'кончил в', 'излил в', 'deep inside', 'cum inside', 'fills her', 'fills him'];
+    const hasEjaculation = ejaculateKeywords.some(k => t.includes(k));
+    
+    if (!hasEjaculation) return false;
+
+    if (settings.mode === 'realism') {
+        // Only vaginal for realism
+        const vaginalKeywords = ['вагин', 'киск', 'в нее', 'vagina', 'pussy', 'her folds'];
+        return vaginalKeywords.some(k => t.includes(k));
+    } else if (settings.mode === 'omegaverse') {
+        if (settings.userGender === 'female') {
+            const vaginalKeywords = ['вагин', 'киск', 'в нее', 'vagina', 'pussy'];
+            return vaginalKeywords.some(k => t.includes(k));
+        } else {
+            // Male Omega - Anal
+            const analKeywords = ['анус', 'поп', 'задниц', 'дырочк', 'anus', 'ass', 'rear', 'his hole'];
+            return analKeywords.some(k => t.includes(k));
+        }
+    }
+    return false;
+}
+
 function getStatusForAI() {
     const settings = extensionSettings[MODULE_NAME];
     const now = new Date();
     const userName = substituteParams('{{user}}');
+    
+    let info = `[System Note: Context is ${settings.mode} mode. ${userName} is ${settings.userGender}. `;
     
     if (settings.isPregnant) {
         const conceptionDate = new Date(settings.conceptionDate);
@@ -72,19 +105,19 @@ function getStatusForAI() {
         const count = settings.pregnancyData.count;
         const gender = settings.pregnancyData.gender;
         
-        let info = `${userName} is currently ${weeks} weeks pregnant. `;
-        info += count === 1 ? 'There is one baby' : (count === 2 ? 'There are twins' : 'There are triplets');
+        info += `${userName} is currently ${weeks} weeks pregnant. `;
+        info += count === 1 ? 'One baby' : (count === 2 ? 'Twins' : 'Triplets');
         if (gender === 'Boy') info += ' (boy).';
         else if (gender === 'Girl') info += ' (girl).';
-        else info += ' (mixed genders).';
-        return info;
+        else info += ' (mixed).';
     } else if (settings.lastPeriodDate) {
         const phaseKey = getCyclePhase(now);
         const day = getCycleDay(now);
         const phase = PHASES[phaseKey];
-        return `${userName} is currently on day ${day} of their menstrual cycle (${phase ? phase.en : phaseKey} phase).`;
+        info += `Currently on day ${day} of menstrual cycle (${phase ? phase.en : phaseKey} phase).`;
     }
-    return '';
+    info += ']';
+    return info;
 }
 
 function updateUI() {
@@ -176,6 +209,18 @@ async function initUI() {
         saveSettingsDebounced();
     });
 
+    $('#st_cycle_tracker_mode').val(settings.mode);
+    $('#st_cycle_tracker_mode').on('change', function() {
+        settings.mode = $(this).val();
+        saveSettingsDebounced();
+    });
+
+    $('#st_cycle_tracker_gender').val(settings.userGender);
+    $('#st_cycle_tracker_gender').on('change', function() {
+        settings.userGender = $(this).val();
+        saveSettingsDebounced();
+    });
+
     $('#st_cycle_tracker_auto').prop('checked', settings.autoConception);
     $('#st_cycle_tracker_auto').on('change', function() {
         settings.autoConception = $(this).prop('checked');
@@ -211,24 +256,30 @@ jQuery(async () => {
     initSettings();
     await initUI();
     
-    eventSource.on(event_types.MESSAGE_RECEIVED, () => {
-        if (extensionSettings[MODULE_NAME].autoConception) {
+    eventSource.on(event_types.MESSAGE_RECEIVED, (messageIndex) => {
+        const settings = extensionSettings[MODULE_NAME];
+        if (!settings.enabled || !settings.autoConception) return;
+
+        // Get the last message content
+        const chat = SillyTavern.getContext().chat;
+        const lastMessage = chat[chat.length - 1];
+        if (!lastMessage) return;
+
+        if (analyzeMessageForConception(lastMessage.mes)) {
+            console.log('Cycle Tracker: Detected potential conception act. Rolling...');
             rollForPregnancy();
         }
     });
 
-    // AI Awareness: Inject status into prompt
     eventSource.on(event_types.CHAT_COMPLETION_PROMPT_READY, (payload) => {
         const settings = extensionSettings[MODULE_NAME];
         if (!settings.enabled || !settings.injectPrompt) return;
 
         const status = getStatusForAI();
         if (status) {
-            // Append to the system prompt or as a hidden message
-            // Most reliable way in ST is to add it as a system message at the end or modify the last message
             payload.push({
                 role: 'system',
-                content: `[System Note: ${status}]`
+                content: status
             });
         }
     });
