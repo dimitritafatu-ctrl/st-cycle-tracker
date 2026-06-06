@@ -2,7 +2,8 @@
 // PROMPTS — инъекция промптов для AI
 // ═══════════════════════════════════════════
 
-import { setExtensionPrompt, extension_prompt_types, saveSettingsDebounced } from '../../../../script.js';
+import { tavern } from './tavern-context.js';
+const { setExtensionPrompt, extension_prompt_types, saveSettingsDebounced } = tavern;
 import { extensionName } from './config.js';
 import { getSettings, getPregnancyData } from './state.js';
 import { getPhaseInfo, calculateWeeksFromDates, getSymptomsForProgress, getRecommendationsForProgress, getFetusSizeForProgress, formatSexIcons, formatFetusCount, getHealthInfo } from './helpers.js';

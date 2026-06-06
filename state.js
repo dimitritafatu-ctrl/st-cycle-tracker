@@ -2,7 +2,8 @@
 // STATE — доступ к настройкам и данным
 // ═══════════════════════════════════════════
 
-import { extension_settings } from '../../../extensions.js';
+import { tavern } from './tavern-context.js';
+const { extension_settings } = tavern;
 import { extensionName, defaultPregnancyData, LANG } from './config.js';
 
 export function getSettings() {

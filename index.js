@@ -2,8 +2,8 @@
 // INDEX — точка входа расширения
 // ═══════════════════════════════════════════
 
-import { eventSource, event_types, saveSettingsDebounced } from '../../../../script.js';
-import { extension_settings } from '../../../extensions.js';
+import { tavern } from './tavern-context.js';
+const { eventSource, event_types, saveSettingsDebounced, extension_settings } = tavern;
 import { extensionName, defaultSettings } from './config.js';
 import { getSettings, getCurrentChatId } from './state.js';
 import { initCustomNotifications, showNotification } from './notifications.js';
@@ -85,7 +85,7 @@ jQuery(async () => {
         initCustomNotifications();
         console.log('[Reproductive] Notifications OK');
 
-        await setupUI();
+        setupUI();
         console.log('[Reproductive] UI OK');
 
         updatePromptInjection();

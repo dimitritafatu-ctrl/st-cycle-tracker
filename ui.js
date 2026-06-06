@@ -2,7 +2,8 @@
 // UI — панель настроек и мониторинг
 // ═══════════════════════════════════════════
 
-import { saveSettingsDebounced } from '../../../../script.js';
+import { tavern } from './tavern-context.js';
+const { saveSettingsDebounced } = tavern;
 import { getSettings, getPregnancyData, L } from './state.js';
 import { getPhaseInfo, calculateWeeksFromDates, getSymptomsForProgress, getRecommendationsForProgress, getFetusSizeForProgress, formatSexIcons, formatFetusCount, getHealthInfo, roll } from './helpers.js';
 import { calculateDueDate, calculateConceptionDate } from './date-parser.js';
@@ -163,19 +164,136 @@ export function syncUI() {
     }
 }
 
-export async function setupUI() {
+export function setupUI() {
     try {
         const s = getSettings();
-        
-        let html = '';
-        if (typeof SillyTavern?.getContext === 'function') {
-            html = await SillyTavern.getContext().renderExtensionTemplateAsync('third-party/st-cycle-tracker', 'settings');
-        } else {
-            console.error('[Reproductive] Context not available for template rendering');
-            return;
-        }
 
-        $('#extensions_settings2').append(html);
+        const settingsHtml = `
+<div class="reproductive-system-settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b>${L('title')}</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+            <div class="flex-container">
+                <label class="checkbox_label"><input type="checkbox" id="repro-enabled"><span>${L('enabled')}</span></label>
+                <label class="checkbox_label"><input type="checkbox" id="repro-notify"><span>${L('notifications')}</span></label>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
+                <label><strong>Режим работы</strong></label>
+                <select id="repro-mode" class="text_pole">
+                    <option value="realism">Реализм</option>
+                    <option value="omegaverse">ОмегаВерс</option>
+                </select>
+            </div>
+            <div class="flex-container flexFlowColumn" style="margin-top: 5px;">
+                <label><strong>Пол персонажа</strong></label>
+                <select id="repro-gender" class="text_pole">
+                    <option value="female">Женщина</option>
+                    <option value="male">Мужчина (для ОмегаВерс)</option>
+                </select>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
+                <label><strong>${L('contraceptionTitle')}</strong></label>
+                <select id="repro-contraception" class="text_pole">
+                    <option value="none">${L('contraceptionTypes.none')}</option>
+                    <option value="condom">${L('contraceptionTypes.condom')}</option>
+                    <option value="pill">${L('contraceptionTypes.pill')}</option>
+                    <option value="iud">${L('contraceptionTypes.iud')}</option>
+                </select>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
+                <label><strong>Срок беременности</strong></label>
+                <div class="flex-container" style="gap: 5px; align-items: center; margin-top: 5px;">
+                    <select id="repro-duration" class="text_pole" style="width: 140px;">
+                        <option value="12">12 нед. (~3 мес.)</option>
+                        <option value="16">16 нед. (~4 мес.)</option>
+                        <option value="20">20 нед. (~5 мес.)</option>
+                        <option value="24">24 нед. (~6 мес.)</option>
+                        <option value="28">28 нед. (~7 мес.)</option>
+                        <option value="32">32 нед. (~8 мес.)</option>
+                        <option value="36">36 нед. (~9 мес.)</option>
+                        <option value="40">40 нед. (стандарт)</option>
+                        <option value="custom">Своё...</option>
+                    </select>
+                    <input type="number" id="repro-duration-custom" class="text_pole" style="width: 60px; display: none;" min="4" max="100" placeholder="нед.">
+                </div>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
+                <label><strong>${L('cycleDay')}</strong></label>
+                <div id="repro-currentcycle" style="padding: 5px; background: var(--SmartThemeBlurTintColor); border-radius: 5px;"><span>${s.cycleDay}</span></div>
+            </div>
+            <div class="flex-container flexFlowColumn" style="margin-top: 10px;">
+                <div class="flex-container" style="gap: 5px; align-items: center;">
+                    <input type="number" id="repro-cycleday" min="1" max="28" value="${s.cycleDay}" class="text_pole" style="width: 60px;">
+                    <button id="repro-setcycle" class="menu_button" style="padding: 5px 10px;">✓</button>
+                </div>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
+                <label><strong>${L('status')}</strong></label>
+                <div id="repro-status"><span style="opacity: 0.7;">${L('notPregnant')}</span></div>
+            </div>
+            <details id="repro-pregnancy-monitor" style="display: none; margin-top: 15px;">
+                <summary style="cursor: pointer; font-weight: 600; color: #ff9ff3; padding: 8px; background: rgba(255,159,243,0.1); border-radius: 8px;"><i class="fa-solid fa-person-pregnant"></i> Мониторинг беременности</summary>
+                <div id="repro-pregnancy-content" class="pregnancy-glass-panel"></div>
+            </details>
+            <div id="repro-manual-pregnancy" style="display: none; margin-top: 10px; padding: 10px; background: rgba(255,159,243,0.1); border-radius: 5px;">
+                <label style="font-size: 12px; opacity: 0.8;">Ручная установка:</label>
+                <div class="flex-container" style="gap: 5px; margin-top: 5px; flex-wrap: wrap;">
+                    <select id="repro-manual-count" class="text_pole" style="width: 80px;">
+                        <option value="1">1 плод</option>
+                        <option value="2">Двойня</option>
+                        <option value="3">Тройня</option>
+                    </select>
+                    <input id="repro-manual-weeks" type="number" class="text_pole" value="1" min="0" max="100" style="width: 60px;">
+                    <span style="font-size: 11px; opacity: 0.7; align-self: center;">нед. из</span>
+                    <input id="repro-manual-duration" type="number" class="text_pole" value="40" min="4" max="100" style="width: 50px;">
+                </div>
+                <div class="flex-container" style="gap: 5px; margin-top: 8px; flex-wrap: wrap; align-items: center;">
+                    <label style="font-size: 11px; opacity: 0.7;">РП-дата:</label>
+                    <input id="repro-manual-rpdate" type="date" class="text_pole" style="width: 140px;">
+                    <button id="repro-setpregnant" class="menu_button" style="padding: 5px 10px; background: #ff9ff3;"><i class="fa-solid fa-person-pregnant"></i> Установить</button>
+                </div>
+            </div>
+            <button id="repro-toggle-manual" class="menu_button" style="margin-top: 10px; opacity: 0.6; font-size: 11px;">Ручная беременность</button>
+            <button id="repro-reset" class="menu_button redWarningBG" style="display: none; margin-top: 10px;">${L('reset')}</button>
+            <hr>
+            <small id="repro-stats" style="opacity: 0.5;">0 / 0</small>
+        </div>
+    </div>
+</div>
+<style>
+.reproductive-system-settings .inline-drawer-content { padding: 10px; }
+.reproductive-system-settings hr { margin: 10px 0; border-color: var(--SmartThemeBorderColor); opacity: 0.3; }
+.reproductive-system-settings select, .reproductive-system-settings input[type="number"] { margin-top: 5px; }
+.pregnancy-glass-panel { margin-top: 10px; padding: 15px; background: rgba(255,159,243,0.08); backdrop-filter: blur(15px); border: 1px solid rgba(255,159,243,0.2); border-radius: 12px; box-shadow: 0 8px 32px rgba(255,159,243,0.15); }
+.pregnancy-info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,159,243,0.1); }
+.pregnancy-info-row:last-child { border-bottom: none; }
+.pregnancy-info-label { font-size: 12px; opacity: 0.7; }
+.pregnancy-info-value { font-weight: 600; color: #ff9ff3; }
+.pregnancy-progress-bar { width: 100%; height: 8px; background: rgba(255,159,243,0.15); border-radius: 10px; overflow: hidden; margin: 10px 0 5px 0; }
+.pregnancy-progress-fill { height: 100%; background: linear-gradient(90deg, #ff9ff3 0%, #ffc2d1 100%); transition: width 0.3s; border-radius: 10px; }
+.pregnancy-symptoms { margin-top: 10px; padding: 10px; background: rgba(255,159,243,0.05); border-radius: 8px; border-left: 3px solid #ff9ff3; }
+.pregnancy-symptoms-title { font-size: 11px; font-weight: 600; color: #ff9ff3; margin-bottom: 5px; }
+.pregnancy-symptoms-text { font-size: 11px; line-height: 1.5; opacity: 0.8; }
+.pregnancy-recommendations { margin-top: 10px; padding: 10px; background: rgba(0,255,136,0.05); border-radius: 8px; border-left: 3px solid #00ff88; }
+.pregnancy-recommendations-title { font-size: 11px; font-weight: 600; color: #00ff88; margin-bottom: 5px; }
+.pregnancy-recommendations-text { font-size: 11px; line-height: 1.5; opacity: 0.8; }
+.pregnancy-complications { margin-top: 10px; padding: 10px; background: rgba(255,68,68,0.05); border-radius: 8px; border-left: 3px solid #ff4444; }
+.pregnancy-complications-title { font-size: 11px; font-weight: 600; color: #ff4444; margin-bottom: 8px; }
+.complication-item { padding: 8px; background: rgba(255,68,68,0.05); border-radius: 6px; margin-bottom: 6px; }
+.complication-item:last-child { margin-bottom: 0; }
+.pregnancy-glass-panel i.fa-solid, .pregnancy-glass-panel i.fa-regular { margin-right: 4px; opacity: 0.8; }
+.pregnancy-info-label i { width: 16px; text-align: center; }
+</style>`;
+
+        $('#extensions_settings2').append(settingsHtml);
 
         $('#repro-enabled').on('change', function() {
             getSettings().isEnabled = this.checked;
@@ -290,23 +408,6 @@ export async function setupUI() {
             showNotification(`🤰 Беременность установлена!\n${weeks}/${duration} нед. | ${formatFetusCount(count)} | Пол: ${formatSexIcons(p.fetusSex)}`, 'success');
 
             $('#repro-manual-pregnancy').slideUp(200);
-        });
-
-        $('#repro-reset').on('click', function() {
-            if (confirm('Сбросить беременность?')) {
-                resetPregnancy();
-                showNotification('Беременность сброшена', 'info');
-            }
-        });
-
-        syncUI();
-
-    } catch (error) {
-        console.error('[Reproductive] setupUI error:', error);
-    }
-}
-
-nual-pregnancy').slideUp(200);
         });
 
         $('#repro-reset').on('click', function() {

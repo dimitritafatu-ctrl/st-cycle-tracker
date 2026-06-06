@@ -2,7 +2,8 @@
 // PREGNANCY — зачатие, осложнения, роды
 // ═══════════════════════════════════════════
 
-import { saveSettingsDebounced } from '../../../../script.js';
+import { tavern } from './tavern-context.js';
+const { saveSettingsDebounced } = tavern;
 import { CHANCES, defaultPregnancyData } from './config.js';
 import { getSettings, getPregnancyData, L } from './state.js';
 import { roll, getCycleModifier, getPhaseInfo, calculateWeeksFromDates, formatSexIcons, formatFetusCount } from './helpers.js';
