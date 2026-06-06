@@ -4,7 +4,7 @@ const {
     renderExtensionTemplateAsync,
     eventSource,
     event_types,
-    substituteParams, // Added for dynamic name resolution
+    substituteParams,
 } = SillyTavern.getContext();
 
 const MODULE_NAME = 'st_cycle_tracker';
@@ -12,11 +12,11 @@ const DEFAULT_SETTINGS = {
     enabled: true,
     lastPeriodDate: null,
     cycleLength: 28,
-    hasFemaleGenitalia: true,
     isPregnant: false,
     conceptionDate: null,
     autoConception: false,
-    conceptionChance: 5, // 5% chance per message during ovulation
+    injectPrompt: true, // New setting for AI awareness
+    conceptionChance: 5,
     pregnancyData: {
         weeks: 0,
         gender: null,
@@ -25,10 +25,10 @@ const DEFAULT_SETTINGS = {
 };
 
 const PHASES = {
-    'Menstruation': { label: 'Менструация', icon: 'fa-droplet', color: '#ff4d4d' },
-    'Follicular': { label: 'Фолликулярная фаза', icon: 'fa-seedling', color: '#4dff88' },
-    'Ovulation': { label: 'Овуляция', icon: 'fa-egg', color: '#ffff4d' },
-    'Luteal': { label: 'Лютеиновая фаза', icon: 'fa-sun', color: '#ffad33' }
+    'Menstruation': { label: 'Менструация', icon: 'fa-droplet', color: '#ff4d4d', en: 'Menstruation' },
+    'Follicular': { label: 'Фолликулярная фаза', icon: 'fa-seedling', color: '#4dff88', en: 'Follicular' },
+    'Ovulation': { label: 'Овуляция', icon: 'fa-egg', color: '#ffff4d', en: 'Ovulation' },
+    'Luteal': { label: 'Лютеиновая фаза', icon: 'fa-sun', color: '#ffad33', en: 'Luteal' }
 };
 
 function initSettings() {
@@ -51,6 +51,40 @@ function getCyclePhase(date) {
     if (diffDays < 12) return 'Follicular';
     if (diffDays < 17) return 'Ovulation';
     return 'Luteal';
+}
+
+function getCycleDay(date) {
+    const settings = extensionSettings[MODULE_NAME];
+    if (!settings.lastPeriodDate) return 0;
+    const lastPeriod = new Date(settings.lastPeriodDate);
+    const diffTime = Math.abs(date - lastPeriod);
+    return (Math.floor(diffTime / (1000 * 60 * 60 * 24)) % settings.cycleLength) + 1;
+}
+
+function getStatusForAI() {
+    const settings = extensionSettings[MODULE_NAME];
+    const now = new Date();
+    const userName = substituteParams('{{user}}');
+    
+    if (settings.isPregnant) {
+        const conceptionDate = new Date(settings.conceptionDate);
+        const weeks = Math.floor((now - conceptionDate) / (1000 * 60 * 60 * 24 * 7));
+        const count = settings.pregnancyData.count;
+        const gender = settings.pregnancyData.gender;
+        
+        let info = `${userName} is currently ${weeks} weeks pregnant. `;
+        info += count === 1 ? 'There is one baby' : (count === 2 ? 'There are twins' : 'There are triplets');
+        if (gender === 'Boy') info += ' (boy).';
+        else if (gender === 'Girl') info += ' (girl).';
+        else info += ' (mixed genders).';
+        return info;
+    } else if (settings.lastPeriodDate) {
+        const phaseKey = getCyclePhase(now);
+        const day = getCycleDay(now);
+        const phase = PHASES[phaseKey];
+        return `${userName} is currently on day ${day} of their menstrual cycle (${phase ? phase.en : phaseKey} phase).`;
+    }
+    return '';
 }
 
 function updateUI() {
@@ -79,8 +113,9 @@ function updateUI() {
     } else if (settings.lastPeriodDate) {
         const phaseKey = getCyclePhase(now);
         const phase = PHASES[phaseKey];
+        const day = getCycleDay(now);
         if (phase) {
-            statusText = `Фаза: ${phase.label}`;
+            statusText = `День ${day}: ${phase.label}`;
             visualHtml = `<i class="fa-solid ${phase.icon}" style="color: ${phase.color}"></i>`;
             statusColor = phase.color;
         } else {
@@ -98,7 +133,7 @@ function updateUI() {
 
 function rollForPregnancy() {
     const settings = extensionSettings[MODULE_NAME];
-    if (!settings.enabled || !settings.hasFemaleGenitalia || settings.isPregnant) return;
+    if (!settings.enabled || settings.isPregnant) return;
 
     const phase = getCyclePhase(new Date());
     if (phase !== 'Ovulation') return;
@@ -122,18 +157,15 @@ function rollForPregnancy() {
         };
         saveSettingsDebounced();
         updateUI();
-        toastr.info('Система: Произошло зачатие! Поздравляем!');
+        toastr.info('Система: Произошло зачатие!');
     }
 }
 
 async function initUI() {
     let html = await renderExtensionTemplateAsync('third-party/st-cycle-tracker', 'settings');
-    
-    // Replace {{user}} dynamically
     if (typeof substituteParams === 'function') {
         html = substituteParams(html);
     }
-
     $('#extensions_settings2').append(html);
 
     const settings = extensionSettings[MODULE_NAME];
@@ -144,15 +176,15 @@ async function initUI() {
         saveSettingsDebounced();
     });
 
-    $('#st_cycle_tracker_female').prop('checked', settings.hasFemaleGenitalia);
-    $('#st_cycle_tracker_female').on('change', function() {
-        settings.hasFemaleGenitalia = $(this).prop('checked');
-        saveSettingsDebounced();
-    });
-
     $('#st_cycle_tracker_auto').prop('checked', settings.autoConception);
     $('#st_cycle_tracker_auto').on('change', function() {
         settings.autoConception = $(this).prop('checked');
+        saveSettingsDebounced();
+    });
+
+    $('#st_cycle_tracker_inject').prop('checked', settings.injectPrompt);
+    $('#st_cycle_tracker_inject').on('change', function() {
+        settings.injectPrompt = $(this).prop('checked');
         saveSettingsDebounced();
     });
 
@@ -182,6 +214,22 @@ jQuery(async () => {
     eventSource.on(event_types.MESSAGE_RECEIVED, () => {
         if (extensionSettings[MODULE_NAME].autoConception) {
             rollForPregnancy();
+        }
+    });
+
+    // AI Awareness: Inject status into prompt
+    eventSource.on(event_types.CHAT_COMPLETION_PROMPT_READY, (payload) => {
+        const settings = extensionSettings[MODULE_NAME];
+        if (!settings.enabled || !settings.injectPrompt) return;
+
+        const status = getStatusForAI();
+        if (status) {
+            // Append to the system prompt or as a hidden message
+            // Most reliable way in ST is to add it as a system message at the end or modify the last message
+            payload.push({
+                role: 'system',
+                content: `[System Note: ${status}]`
+            });
         }
     });
 
