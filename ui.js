@@ -2,7 +2,7 @@
 // UI — панель настроек и мониторинг
 // ═══════════════════════════════════════════
 
-import { saveSettingsDebounced } from '../../../script.js';
+import { saveSettingsDebounced } from '../../../../script.js';
 import { getSettings, getPregnancyData, L } from './state.js';
 import { getPhaseInfo, calculateWeeksFromDates, getSymptomsForProgress, getRecommendationsForProgress, getFetusSizeForProgress, formatSexIcons, formatFetusCount, getHealthInfo, roll } from './helpers.js';
 import { calculateDueDate, calculateConceptionDate } from './date-parser.js';

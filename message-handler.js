@@ -2,7 +2,7 @@
 // MESSAGE-HANDLER — обработка входящих сообщений
 // ═══════════════════════════════════════════
 
-import { saveSettingsDebounced } from '../../../script.js';
+import { saveSettingsDebounced } from '../../../../script.js';
 import { defaultPregnancyData } from './config.js';
 import { getSettings, getPregnancyData } from './state.js';
 import { roll, formatFetusCount, formatSexIcons } from './helpers.js';

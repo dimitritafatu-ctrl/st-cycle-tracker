@@ -2,7 +2,7 @@
 // PROMPTS — инъекция промптов для AI
 // ═══════════════════════════════════════════
 
-import { setExtensionPrompt, extension_prompt_types, saveSettingsDebounced } from '../../../script.js';
+import { setExtensionPrompt, extension_prompt_types, saveSettingsDebounced } from '../../../../script.js';
 import { extensionName } from './config.js';
 import { getSettings, getPregnancyData } from './state.js';
 import { getPhaseInfo, calculateWeeksFromDates, getSymptomsForProgress, getRecommendationsForProgress, getFetusSizeForProgress, formatSexIcons, formatFetusCount, getHealthInfo } from './helpers.js';
