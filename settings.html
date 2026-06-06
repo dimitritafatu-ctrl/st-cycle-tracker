@@ -1,0 +1,99 @@
+<div class="reproductive-system-settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b>Cycle & Pregnancy Tracker</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+            <div class="flex-container">
+                <label class="checkbox_label"><input type="checkbox" id="repro-enabled"><span>Включено</span></label>
+                <label class="checkbox_label"><input type="checkbox" id="repro-notify"><span>Уведомления</span></label>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
+                <label><strong>Режим работы</strong></label>
+                <select id="repro-mode" class="text_pole">
+                    <option value="realism">Реализм</option>
+                    <option value="omegaverse">ОмегаВерс</option>
+                </select>
+            </div>
+            <div class="flex-container flexFlowColumn" style="margin-top: 5px;">
+                <label><strong>Пол персонажа</strong></label>
+                <select id="repro-gender" class="text_pole">
+                    <option value="female">Женщина</option>
+                    <option value="male">Мужчина (для ОмегаВерс)</option>
+                </select>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
+                <label><strong>Контрацепция</strong></label>
+                <select id="repro-contraception" class="text_pole">
+                    <option value="none">Нет защиты</option>
+                    <option value="condom">Презерватив (85%)</option>
+                    <option value="pill">Таблетки (91%)</option>
+                    <option value="iud">ВМС (99%)</option>
+                </select>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
+                <label><strong>Срок беременности</strong></label>
+                <div class="flex-container" style="gap: 5px; align-items: center; margin-top: 5px;">
+                    <select id="repro-duration" class="text_pole" style="width: 140px;">
+                        <option value="12">12 нед. (~3 мес.)</option>
+                        <option value="16">16 нед. (~4 мес.)</option>
+                        <option value="20">20 нед. (~5 мес.)</option>
+                        <option value="24">24 нед. (~6 мес.)</option>
+                        <option value="28">28 нед. (~7 мес.)</option>
+                        <option value="32">32 нед. (~8 мес.)</option>
+                        <option value="36">36 нед. (~9 мес.)</option>
+                        <option value="40">40 нед. (стандарт)</option>
+                        <option value="custom">Своё...</option>
+                    </select>
+                    <input type="number" id="repro-duration-custom" class="text_pole" style="width: 60px; display: none;" min="4" max="100" placeholder="нед.">
+                </div>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
+                <label><strong>День цикла</strong></label>
+                <div id="repro-currentcycle" style="padding: 5px; background: var(--SmartThemeBlurTintColor); border-radius: 5px;"><span>1</span></div>
+            </div>
+            <div class="flex-container flexFlowColumn" style="margin-top: 10px;">
+                <div class="flex-container" style="gap: 5px; align-items: center;">
+                    <input type="number" id="repro-cycleday" min="1" max="28" value="1" class="text_pole" style="width: 60px;">
+                    <button id="repro-setcycle" class="menu_button" style="padding: 5px 10px;">✓</button>
+                </div>
+            </div>
+            <hr>
+            <div class="flex-container flexFlowColumn">
+                <label><strong>Статус</strong></label>
+                <div id="repro-status"><span style="opacity: 0.7;">Не беременна</span></div>
+            </div>
+            <details id="repro-pregnancy-monitor" style="display: none; margin-top: 15px;">
+                <summary style="cursor: pointer; font-weight: 600; color: #ff9ff3; padding: 8px; background: rgba(255,159,243,0.1); border-radius: 8px;"><i class="fa-solid fa-person-pregnant"></i> Мониторинг беременности</summary>
+                <div id="repro-pregnancy-content" class="pregnancy-glass-panel"></div>
+            </details>
+            <div id="repro-manual-pregnancy" style="display: none; margin-top: 10px; padding: 10px; background: rgba(255,159,243,0.1); border-radius: 5px;">
+                <label style="font-size: 12px; opacity: 0.8;">Ручная установка:</label>
+                <div class="flex-container" style="gap: 5px; margin-top: 5px; flex-wrap: wrap;">
+                    <select id="repro-manual-count" class="text_pole" style="width: 80px;">
+                        <option value="1">1 плод</option>
+                        <option value="2">Двойня</option>
+                        <option value="3">Тройня</option>
+                    </select>
+                    <input id="repro-manual-weeks" type="number" class="text_pole" value="1" min="0" max="100" style="width: 60px;">
+                    <span style="font-size: 11px; opacity: 0.7; align-self: center;">нед. из</span>
+                    <input id="repro-manual-duration" type="number" class="text_pole" value="40" min="4" max="100" style="width: 50px;">
+                </div>
+                <div class="flex-container" style="gap: 5px; margin-top: 8px; flex-wrap: wrap; align-items: center;">
+                    <label style="font-size: 11px; opacity: 0.7;">РП-дата:</label>
+                    <input id="repro-manual-rpdate" type="date" class="text_pole" style="width: 140px;">
+                    <button id="repro-setpregnant" class="menu_button" style="padding: 5px 10px; background: #ff9ff3;"><i class="fa-solid fa-person-pregnant"></i> Установить</button>
+                </div>
+            </div>
+            <button id="repro-toggle-manual" class="menu_button" style="margin-top: 10px; opacity: 0.6; font-size: 11px;">Ручная беременность</button>
+            <button id="repro-reset" class="menu_button redWarningBG" style="display: none; margin-top: 10px;">Сбросить беременность</button>
+            <hr>
+            <small id="repro-stats" style="opacity: 0.5;">0 / 0</small>
+        </div>
+    </div>
+</div>
