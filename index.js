@@ -85,7 +85,7 @@ jQuery(async () => {
         initCustomNotifications();
         console.log('[Reproductive] Notifications OK');
 
-        setupUI();
+        await setupUI();
         console.log('[Reproductive] UI OK');
 
         updatePromptInjection();
